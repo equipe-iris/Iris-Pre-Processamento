@@ -1,0 +1,63 @@
+# Arquivos compilados e cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Arquivos C e extensões compiladas
+*.so
+
+# Distribuição / empacotamento
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+
+# Logs do instalador
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ambientes virtuais
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Pasta de instância do Flask
+instance/
+
+# Variáveis de ambiente (dotenv)
+.env
+
+# Cache de testes e outras ferramentas
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# Relatórios de cobertura de teste
+.coverage
+.coverage.*
+
+# Arquivos de configuração de editores
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Arquivos gerados pelo sistema operacional
+.DS_Store
+Thumbs.db
+
+# (Opcional) Pasta de dataset se não quiser versionar os dados
+dataset/
