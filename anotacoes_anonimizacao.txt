@@ -1,0 +1,16 @@
+Entidades de dados pesosais reconhecidas:
+- Nome
+- CPF
+- Email
+- Telefone
+
+Problemas encontrados:
+- Nomes de pessoas sendo reconhecidos como locais 
+- Não reconhecimento de nomes incomuns
+- Não reconhecimento de nomes escritos de forma errada
+- Nomes de empresas não estão sendo reconhecidos (deviam?)
+
+
+Observações para o pré-processamento:
+- Não descapitalizar o texto antes da anonimização
+- Remover asteriscos e aspas na limpeza dos dados, pois há mensagens envoltas nos caracteres que não são reconhecidas
