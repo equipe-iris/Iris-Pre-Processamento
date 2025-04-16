@@ -1,11 +1,10 @@
-import os
-from dotenv import load_dotenv
-from app import app
+from app import createApp
+from config import PORT, ALLOWED_ORIGINS
 
-# Carrega as variáveis de ambiente do arquivo .env
-load_dotenv()
+app = createApp()
+
 
 if __name__ == '__main__':
     # Recupera a variável "PORT" do ambiente e define um valor padrão caso ela não esteja configurada
-    port = int(os.getenv("PORT", 5000))
+    port = PORT
     app.run(debug=True, host='0.0.0.0', port=port)
