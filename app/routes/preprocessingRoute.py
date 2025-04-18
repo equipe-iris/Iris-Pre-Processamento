@@ -7,20 +7,19 @@ bp = Blueprint('preprocessing', __name__)
 @bp.route('/upload-dataset', methods=['POST'])
 def getDataset():
     try:
-        if 'file' not in request.files:
+        files = request.files.getlist('file')
+        if not files or len(files) == 0:
             return jsonify({'erro': 'Nenhum arquivo enviado.'}), 400
 
-        file = request.files['file']
-
-        print(file.filename)
-
-        if file.filename != 'Jira Exportar CSV (todos os campos) 20250312084318.csv' and file.filename != 'Chamados Porto.csv':
-            return jsonify({'erro': 'Nome do arquivo inválido.'}), 400
+        for file in files:
+            print(file.filename)
+            if file.filename != 'Jira Exportar CSV (todos os campos) 20250312084318.csv' and file.filename != 'Chamados Porto.csv':
+                return jsonify({'erro': 'Nome do arquivo inválido.'}), 400
         
-        df = dataExtraction(file, file.filename)
+            df = dataExtraction(file, file.filename)
 
-        print(df)
-        preProcessDf = preprocessing(df)
+            print(df)
+            preProcessDf = preprocessing(df)
 
         return jsonify({'mensagem': 'Arquivo recebido com sucesso.'}), 200
         
