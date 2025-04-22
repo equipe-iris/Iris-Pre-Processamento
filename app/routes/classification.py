@@ -1,28 +1,27 @@
 from flask import Blueprint, request, jsonify
+import pandas as pd
 from app.service.dataExtraction import dataExtraction
-from app.service.preprocessing import preprocessing
+from app.service.patterns import normalizeText, patterns
 
-bp = Blueprint('preprocessing', __name__)
+bp = Blueprint('classification', __name__)
 
-@bp.route('/upload-dataset', methods=['POST'])
+@bp.route('/', methods=['POST'])
 def getDataset():
     try:
         files = request.files.getlist('file')
+    
         if not files or len(files) == 0:
             return jsonify({'erro': 'Nenhum arquivo enviado.'}), 400
-
-        for file in files:
-            print(file.filename)
-            if file.filename != 'Jira Exportar CSV (todos os campos) 20250312084318.csv' and file.filename != 'Chamados Porto.csv':
-                return jsonify({'erro': 'Nome do arquivo inválido.'}), 400
         
-            df = dataExtraction(file, file.filename)
+        corpus = []
 
-            print(df)
-            preProcessDf = preprocessing(df)
+        for file in files:            
+            df = dataExtraction(file, file.filename)
+            records = df.to_dict(orient='records')
+            corpus.extend(records)
+
 
         return jsonify({'mensagem': 'Arquivo recebido com sucesso.'}), 200
         
-
     except Exception as e:
         return jsonify({'error': str(e)}), 500

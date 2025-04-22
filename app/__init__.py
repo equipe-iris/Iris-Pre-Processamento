@@ -9,7 +9,7 @@ def createApp():
     CORS(app, origins=ALLOWED_ORIGINS)
 
     # Importa e registra o blueprint de routes
-    from app.routes.preprocessingRoute import bp as preprocessing_bp
-    app.register_blueprint(preprocessing_bp, url_prefix='/preprocessing')
+    from app.routes.classification import bp as classification_bp
+    app.register_blueprint(classification_bp, url_prefix='/classification')
 
     return app
