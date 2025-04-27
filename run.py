@@ -1,5 +1,5 @@
 from app import createApp
-from config import PORT, ALLOWED_ORIGINS
+from config import PORT
 
 app = createApp()
 
