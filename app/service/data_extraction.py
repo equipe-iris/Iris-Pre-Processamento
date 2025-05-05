@@ -22,8 +22,8 @@ def data_extraction(file, file_name):
 
         return final_df
 
-    df = pd.read_csv(file, delimiter=';', encoding='utf-8')
-
+    df = pd.read_csv(file, delimiter=',', encoding='utf-8')
+    df['Data de abertura'].head()
     df['DataInicio'] = df['Data de abertura'].apply(safe_format_porto)
     df['DataFinal']  = df['Data de fechamento'].apply(safe_format_porto)
 
@@ -99,9 +99,13 @@ def parse_datetime_string_porto(date):
 def safe_format_jira(date_str):
     if pd.isna(date_str) or not str(date_str).strip():
         return ""
-    return parse_datetime_string_jira(date_str).strftime("%Y-%m-%d %H:%M")
+    dt = parse_datetime_string_jira(date_str)
+
+    return dt.isoformat()
 
 def safe_format_porto(date_str):
     if pd.isna(date_str) or not str(date_str).strip():
         return ""
-    return parse_datetime_string_porto(date_str).strftime("%Y-%m-%d %H:%M")
+    dt = parse_datetime_string_porto(date_str)
+
+    return dt.isoformat()

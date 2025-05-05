@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 import pandas as pd
 import requests
 
-from config import CLASSIFY_RESULTS_URL
+from config import IA_CLASSIFY_RESULTS_URL
 from app.service.data_extraction import data_extraction
 from app.service.preprocessing import preprocessing
 from app.service.training import sentiment_model, type_model
@@ -19,8 +19,7 @@ def predict():
         if not files or len(files) == 0:
             return jsonify({'erro': 'Nenhum arquivo enviado.'}), 400
         
-        payload = []
-
+        results = []
         for file, file_id in zip(files, file_ids):
             df = data_extraction(file, file.filename)
             records = df.to_dict(orient='records')
@@ -31,12 +30,12 @@ def predict():
                 result = predict_ticket(tokens, ticket)
                 processed.append(result)
 
-            payload.append({
+            results.append({
                 'file_id': file_id,
                 'processed_tickets': processed
             })
 
-        response = requests.post(CLASSIFY_RESULTS_URL, json=payload)
+        response = requests.post(IA_CLASSIFY_RESULTS_URL, json=results)
         if response.status_code != 200:
             
             return jsonify({

@@ -1,6 +1,6 @@
 import nltk
 from nltk import word_tokenize
-nltk.download('punkt')
+nltk.download('punkt_tab')
 nltk.download('stopwords')
 
 def tokenization(text):
