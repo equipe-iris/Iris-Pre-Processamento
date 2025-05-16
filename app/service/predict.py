@@ -20,10 +20,10 @@ def predict_ticket(tokens, ticket):
     result_type = label_type.item()
 
     return {
-        'id': ticket['Id'],
+        'id': str(ticket['Id']),
         'title': ticket['Titulo'],
-        'sentiment': result_sentiment,
-        'type': result_type,
+        'sentiment_rating': result_sentiment,
+        'service_rating': result_type,
         'start_date': ticket['DataInicio'],
         'end_date': ticket['DataFinal']
     }
