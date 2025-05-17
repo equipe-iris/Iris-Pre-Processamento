@@ -44,7 +44,7 @@ def predict():
                 'response': response.text
             }), response.status_code         
 
-        return jsonify('Dados processados com sucesso'), 200
+        return jsonify({"mensagem": 'Dados processados com sucesso'}), 200
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
