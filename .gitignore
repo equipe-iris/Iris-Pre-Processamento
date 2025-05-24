@@ -61,3 +61,6 @@ Thumbs.db
 
 # (Opcional) Pasta de dataset se não quiser versionar os dados
 dataset/
+
+# Pasta model, modelo de sumarização
+model/

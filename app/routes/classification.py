@@ -5,8 +5,8 @@ import requests
 from config import IA_CLASSIFY_RESULTS_URL
 from app.service.data_extraction import data_extraction
 from app.service.preprocessing import preprocessing
-from app.service.training import sentiment_model, type_model
-from app.service.predict import predict_ticket
+from app.service.classification_training import sentiment_model, type_model
+from app.service.classification_predict import predict_ticket
 
 bp = Blueprint('classification', __name__)
 
