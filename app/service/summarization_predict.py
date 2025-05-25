@@ -5,7 +5,7 @@ artifacts = Path(__file__).resolve().parents[1] / 'artifacts' / 'summarization' 
 tokenizer = BartTokenizer.from_pretrained(artifacts)
 model = BartForConditionalGeneration.from_pretrained(artifacts)
 
-def predict_tickets(text):
+def summarization_predict(text):
     inputs = tokenizer(
         text,
         return_tensors="pt",

@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+from app.service.patterns import normalize_text, patterns
 
 
 def data_extraction(file, file_name):
@@ -8,6 +9,7 @@ def data_extraction(file, file_name):
 
         df['DataInicio'] = df['Criado'].apply(safe_format_jira)
         df['DataFinal']  = df['Resolvido'].apply(safe_format_jira)
+        df['Responsavel'] = df['Responsável']
 
         df['Interacao'] = df.apply(
             lambda row: join_interaction(row, 'Descrição', 'Comentar'),
@@ -26,7 +28,7 @@ def data_extraction(file, file_name):
     df['Data de abertura'].head()
     df['DataInicio'] = df['Data de abertura'].apply(safe_format_porto)
     df['DataFinal']  = df['Data de fechamento'].apply(safe_format_porto)
-
+    df['Responsavel'] = df['Atribuído para - Técnico']
 
     df['Interacao'] = df.apply(
         lambda row: join_interaction(row, 'Descrição', 'Solução - Solução'),
@@ -34,7 +36,7 @@ def data_extraction(file, file_name):
     )
 
     final_df = (
-        df[['Título', 'ID', 'Interacao', 'DataInicio', 'DataFinal']]
+        df[['Título', 'ID', 'Responsavel', 'Interacao', 'DataInicio', 'DataFinal']]
         .rename(columns={'Título': 'Titulo', 'ID': 'Id'})
         .copy()
     )
@@ -54,9 +56,11 @@ def join_interaction(row, description_column, comment_column):
         if pd.notnull(value):
             value = value.strip()
             if value:
-                values.append(value)
+                value = normalize_text(value, patterns)
+                if value != '':
+                    values.append(value)
 
-    return ' '.join(values)
+    return ' | '.join(values)
 
 def parse_datetime_string_jira(date):
     months = {

@@ -8,8 +8,9 @@ import threading
 from io import BytesIO
 
 from app.service.data_extraction import data_extraction
-from app.service.preprocessing import preprocessing
-from app.service.classification_predict import predict_ticket
+from app.service.preprocessing_classification import preprocessing_classification
+from app.service.classification_predict import classification_predict
+from app.service.summarization_predict import summarization_predict
 from config import IA_CLASSIFY_RESULTS_URL
 
 def connect_rabbitmq():
@@ -54,15 +55,27 @@ def process_file_from_s3(file_id, bucket, original_name, s3_client):
         df = data_extraction(file_obj, original_name)
         records = df.to_dict(orient='records')
 
-        processed = []
+        processed_tickets = []
         for ticket in records:
-            tokens = preprocessing(ticket['Interacao'])
-            result = predict_ticket(tokens, ticket)
-            processed.append(result)
+            tokens = preprocessing_classification(ticket['Interacao'])
+            result_classification = classification_predict(tokens, ticket)
+            result_summarization = summarization_predict(ticket['Interacao'])
+            payload = {
+                'id': str(ticket['Id']),
+                'title': ticket['Titulo'],
+                'in_charge': ticket['Responsavel'],
+                'content': ticket['Interacao'],
+                'sentiment_rating': result_classification['sentiment_rating'],
+                'service_rating': result_classification['service_rating'],
+                'summary': result_summarization,
+                'start_date': ticket['DataInicio'],
+                'end_date': ticket['DataFinal']
+            }
+            processed_tickets.append(payload)
 
         result = {
             'file_id': file_id,
-            'processed_tickets': processed
+            'processed_tickets': processed_tickets
         }
         
         response = requests.post(IA_CLASSIFY_RESULTS_URL, json=[result])
