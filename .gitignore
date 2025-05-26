@@ -61,3 +61,5 @@ Thumbs.db
 
 # (Opcional) Pasta de dataset se não quiser versionar os dados
 dataset/
+
+app/artifacts/semantic_search/
