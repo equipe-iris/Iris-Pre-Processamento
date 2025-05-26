@@ -5,7 +5,8 @@ from app.routes.classification import bp as classification_bp
 from app.routes.semantic_search import bp as semantic_search_bp
 from sentence_transformers import SentenceTransformer
 from app.service.semantic_search import inicializar_indice_e_embeddings
-
+from app.routes.sumarization import bp as sumarization_bp
+from app.service.queue_consumer import run_consumer_thread
 SEMANTIC_SEARCH_MODEL_DIR = 'app/artifacts/semantic_search'
 
 def createApp():
@@ -24,5 +25,12 @@ def createApp():
     # Registra o blueprint de routes
     app.register_blueprint(classification_bp, url_prefix='/classification')
     app.register_blueprint(semantic_search_bp, url_prefix='/semantic-search')
+
+    # Importa e registra o blueprint de routes    
+    app.register_blueprint(classification_bp, url_prefix='/classification')
+    app.register_blueprint(sumarization_bp, url_prefix='/sumarization')
+    
+    # Inicia o consumidor de mensagens
+    run_consumer_thread()
 
     return app

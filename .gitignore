@@ -63,3 +63,6 @@ Thumbs.db
 dataset/
 
 app/artifacts/semantic_search/
+
+# Pasta model, modelo de sumarização
+model/

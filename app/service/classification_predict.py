@@ -2,12 +2,12 @@ import joblib
 from pathlib import Path
 
 
-def predict_ticket(tokens, ticket):
-    art = Path(__file__).resolve().parents[1] / 'artifacts'
-    vectorizer_sent = joblib.load(art / 'sentiment_vectorizer.joblib')
-    vectorizer_type = joblib.load(art / 'type_vectorizer.joblib')
-    svm_sent   = joblib.load(art / 'sentiment_model.joblib')
-    svm_type   = joblib.load(art / 'type_model.joblib')
+def classification_predict(tokens, ticket):
+    artifacts = Path(__file__).resolve().parents[1] / 'artifacts' / 'classification'
+    vectorizer_sent = joblib.load(artifacts / 'sentiment_vectorizer.joblib')
+    vectorizer_type = joblib.load(artifacts / 'type_vectorizer.joblib')
+    svm_sent   = joblib.load(artifacts / 'sentiment_model.joblib')
+    svm_type   = joblib.load(artifacts / 'type_model.joblib')
 
     text = " ".join(tokens)
 
