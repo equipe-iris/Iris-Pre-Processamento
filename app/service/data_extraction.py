@@ -17,7 +17,7 @@ def data_extraction(file, file_name):
         )
 
         final_df = (
-            df[['Resumo', 'Chave da item', 'Interacao', 'DataInicio', 'DataFinal']]
+            df[['Resumo', 'Chave da item', 'Responsavel', 'Interacao', 'DataInicio', 'DataFinal']]
             .rename(columns={'Resumo': 'Titulo', 'Chave da item': 'Id'})
             .copy()
         )

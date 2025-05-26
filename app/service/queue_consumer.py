@@ -16,15 +16,16 @@ from config import IA_CLASSIFY_RESULTS_URL
 def connect_rabbitmq():
     connection = None
     attempts = 0
-    max_attempts = 10
+    max_attempts = 15
     
     while not connection and attempts < max_attempts:
         try:
             attempts += 1
             print(f"Connecting to RabbitMQ (attempt {attempts}/{max_attempts})...")
-            connection = pika.BlockingConnection(
-                pika.URLParameters(os.getenv('IA_RABBITMQ_URL'))
-            )
+            params = pika.URLParameters(os.getenv('IA_RABBITMQ_URL'))
+            params.heartbeat = 600
+            params.blocked_connection_timeout = 300
+            connection = pika.BlockingConnection(params)
             print("Connected to RabbitMQ")
         except Exception as e:
             print(f"Connection failed: {e}")
@@ -49,43 +50,47 @@ def process_file_from_s3(file_id, bucket, original_name, s3_client):
         response = s3_client.get_object(Bucket=bucket, Key=file_id)
         file_content = response['Body'].read()
         
-        file_obj = BytesIO(file_content)
-        file_obj.name = original_name
+        with tempfile.NamedTemporaryFile(suffix=os.path.splitext(original_name)[1], delete=False) as tmp_file:
+            tmp_file.write(file_content)
+            tmp_file_path = tmp_file.name
         
-        df = data_extraction(file_obj, original_name)
-        records = df.to_dict(orient='records')
+        try:
+            df = data_extraction(tmp_file_path, original_name)
+            records = df.to_dict(orient='records')
 
-        processed_tickets = []
-        for ticket in records:
-            tokens = preprocessing_classification(ticket['Interacao'])
-            result_classification = classification_predict(tokens, ticket)
-            result_summarization = summarization_predict(ticket['Interacao'])
-            payload = {
-                'id': str(ticket['Id']),
-                'title': ticket['Titulo'],
-                'in_charge': ticket['Responsavel'],
-                'content': ticket['Interacao'],
-                'sentiment_rating': result_classification['sentiment_rating'],
-                'service_rating': result_classification['service_rating'],
-                'summary': result_summarization,
-                'start_date': ticket['DataInicio'],
-                'end_date': ticket['DataFinal']
+            processed_tickets = []
+            for ticket in records:
+                tokens = preprocessing_classification(ticket['Interacao'])
+                result_classification = classification_predict(tokens, ticket)
+                result_summarization = summarization_predict(ticket['Interacao'])
+                payload = {
+                    'id': str(ticket['Id']),
+                    'title': ticket['Titulo'],
+                    'in_charge': ticket['Responsavel'],
+                    'content': ticket['Interacao'],
+                    'sentiment_rating': result_classification['sentiment_rating'],
+                    'service_rating': result_classification['service_rating'],
+                    'summary': result_summarization,
+                    'start_date': ticket['DataInicio'],
+                    'end_date': ticket['DataFinal']
+                }
+                processed_tickets.append(payload)
+
+            result = {
+                'file_id': file_id,
+                'processed_tickets': processed_tickets
             }
-            processed_tickets.append(payload)
-
-        result = {
-            'file_id': file_id,
-            'processed_tickets': processed_tickets
-        }
-        
-        response = requests.post(IA_CLASSIFY_RESULTS_URL, json=[result])
-        if response.status_code != 200:
-            print(f"Failed to send results: {response.status_code} - {response.text}")
-        else:
-            print(f"Successfully processed file {original_name} with ID {file_id}")
-        
-        s3_client.delete_object(Bucket=bucket, Key=file_id)
-        print(f"Deleted file {file_id} from S3")
+            
+            response = requests.post(IA_CLASSIFY_RESULTS_URL, json=[result])
+            if response.status_code != 200:
+                print(f"Failed to send results: {response.status_code} - {response.text}")
+            else:
+                print(f"Successfully processed file {original_name} with ID {file_id}")
+            
+            s3_client.delete_object(Bucket=bucket, Key=file_id)
+            print(f"Deleted file {file_id} from S3")
+        finally:
+            os.unlink(tmp_file_path)
         
     except Exception as e:
         print(f"Error processing file {file_id}: {e}")
@@ -110,20 +115,24 @@ def callback(ch, method, properties, body):
         ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
 
 def start_consumer():
-    try:
-        connection = connect_rabbitmq()
-        channel = connection.channel()
-        
-        queue_name = os.getenv('IA_QUEUE_NAME')
-        channel.queue_declare(queue=queue_name, durable=True)
-        channel.basic_qos(prefetch_count=1)
-        
-        print(f"Waiting for messages in {queue_name}")
-        channel.basic_consume(queue=queue_name, on_message_callback=callback)
-        channel.start_consuming()
-        
-    except Exception as e:
-        print(f"Consumer error: {e}")
+    while True:
+        try:
+            connection = connect_rabbitmq()
+            channel = connection.channel()
+            
+            queue_name = os.getenv('IA_QUEUE_NAME')
+            channel.queue_declare(queue=queue_name, durable=True)
+            channel.basic_qos(prefetch_count=1)
+            
+            print(f"Waiting for messages in {queue_name}")
+            channel.basic_consume(queue=queue_name, on_message_callback=callback)
+            channel.start_consuming()
+            
+        except Exception as e:
+            print(f"Consumer error: {e}")
+            print("Reconnecting in 5 seconds...")
+            import time
+            time.sleep(5)
 
 def run_consumer_thread():
     consumer_thread = threading.Thread(target=start_consumer, daemon=True)

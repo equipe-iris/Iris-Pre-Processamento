@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify
 import pandas as pd
 
-from app.service.preprocessing import preprocessing
 from app.service.classification_training import sentiment_model, type_model
+from app.service.preprocessing_classification import normalize_text
 
 bp = Blueprint('classification', __name__)
 
@@ -17,7 +17,7 @@ def train():
         labels = []
         
         for _, row in sentiment_df.iterrows():
-            tokens = preprocessing(row['Interacao'])
+            tokens = sentiment_model(row['Interacao'])
             documents.append(" ".join(tokens))
             labels.append(row['Classe'])
 
@@ -27,7 +27,7 @@ def train():
         labels = []
 
         for _, row in type_df.iterrows():
-            tokens = preprocessing(row['Interacao'])
+            tokens = type_model(row['Interacao'])
             documents.append(" ".join(tokens))
             labels.append(row['Classe'])
 
