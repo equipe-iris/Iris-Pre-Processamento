@@ -2,7 +2,7 @@ import joblib
 from pathlib import Path
 
 
-def predict_ticket(tokens, ticket):
+def classification_predict(tokens, ticket):
     artifacts = Path(__file__).resolve().parents[1] / 'artifacts' / 'classification'
     vectorizer_sent = joblib.load(artifacts / 'sentiment_vectorizer.joblib')
     vectorizer_type = joblib.load(artifacts / 'type_vectorizer.joblib')

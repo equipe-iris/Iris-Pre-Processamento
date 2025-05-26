@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 import pandas as pd
 
 from app.service.summarization_training import summarization_training
-from app.service.summarization_predict import predict_tickets
+from app.service.summarization_predict import summarization_predict
 
 bp = Blueprint('sumarization', __name__)
 
@@ -22,7 +22,7 @@ def predict():
     try:
         data = request.get_json()
         text = data.get("text", "").strip()
-        summary = predict_tickets(text)
+        summary = (text)
         print(f'Resultado do modelo ${summary}')
         return jsonify({'summary': summary}), 200
     except Exception as e:
