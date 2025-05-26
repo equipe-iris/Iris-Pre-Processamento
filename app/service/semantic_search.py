@@ -63,7 +63,6 @@ def inicializar_indice_e_embeddings(model):
         INDEX_FAISS = index
 
 def semantic_search_service(query, model, top_k=5):
-    from semantic_state import INDEX_FAISS, TEXTOS, INDEX_LOCK
 
     with INDEX_LOCK:
         if INDEX_FAISS is None or not TEXTOS:
@@ -82,16 +81,15 @@ def semantic_search_service(query, model, top_k=5):
                     usados.add(ticket_id)
                     resultados.append({
                         "id": ticket.get("id"),
-                        "title": ticket.get("title"),
-                        "content": ticket.get("content"),
-                        "similaridade": float(distances[0][i])
+                        "score": float(distances[0][i])
                     })
                 if len(resultados) >= top_k:
                     break
         return resultados
 
 def sincronizar_novos_tickets(novos_tickets, model):
-    print("Sincronizando novos tickets com o índice FAISS...")
+    global EMBEDDINGS, INDEX_FAISS, TEXTOS
+
     if not novos_tickets:
         return print("Nenhum novo ticket para sincronizar.")
 
