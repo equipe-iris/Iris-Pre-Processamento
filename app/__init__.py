@@ -25,9 +25,6 @@ def createApp():
     # Registra o blueprint de routes
     app.register_blueprint(classification_bp, url_prefix='/classification')
     app.register_blueprint(semantic_search_bp, url_prefix='/semantic-search')
-
-    # Importa e registra o blueprint de routes    
-    app.register_blueprint(classification_bp, url_prefix='/classification')
     app.register_blueprint(sumarization_bp, url_prefix='/sumarization')
     
     # Inicia o consumidor de mensagens
